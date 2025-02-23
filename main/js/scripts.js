@@ -1,135 +1,89 @@
-/*!
-* Start Bootstrap - Creative v7.0.7 (https://startbootstrap.com/theme/creative)
-* Copyright 2013-2025 Start Bootstrap
-* Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-creative/blob/master/LICENSE)
-*/
-//
-// Scripts
-//
-
-function throttle(fn, time) {
-    let timeoutId;
-    return (...args) => {
-        if (timeoutId) {
-            return;
-        }
-        fn(...args);
-        timeoutId = setTimeout(() => {
-            timeoutId = null;
-        }, time);
-    };
-}
-
-
-
-window.addEventListener('DOMContentLoaded', event => {
-
-    // Navbar shrink function
-    var navbarShrink = function () {
-        const navbarCollapsible = document.body.querySelector('#mainNav');
-        if (!navbarCollapsible) {
-            return;
-        }
-        if (window.scrollY === 0) {
-            navbarCollapsible.classList.remove('navbar-shrink')
-        } else {
-            navbarCollapsible.classList.add('navbar-shrink')
-        }
-
-    };
-
-    // Shrink the navbar
-    navbarShrink();
-
-    // Shrink the navbar when page is scrolled
-    document.addEventListener('scroll', navbarShrink);
-
-    // Activate Bootstrap scrollspy on the main nav element
-    const mainNav = document.body.querySelector('#mainNav');
-    if (mainNav) {
-        new bootstrap.ScrollSpy(document.body, {
-            target: '#mainNav',
-            rootMargin: '0px 0px -40%',
-        });
-    };
-
-    // Collapse responsive navbar when toggler is visible
-    const navbarToggler = document.body.querySelector('.navbar-toggler');
-    const responsiveNavItems = [].slice.call(
-        document.querySelectorAll('#navbarResponsive .nav-link')
-    );
-    responsiveNavItems.map(function (responsiveNavItem) {
-        responsiveNavItem.addEventListener('click', () => {
-            if (window.getComputedStyle(navbarToggler).display !== 'none') {
-                navbarToggler.click();
-            }
-        });
-    });
-
-    // Activate SimpleLightbox plugin for portfolio items
-    new SimpleLightbox({
-        elements: '#portfolio a.portfolio-box'
-    });
-
-    // Smooth scrolling
-
-    const nav = document.querySelector("nav");
-    nav.addEventListener("click", smoothScrooling);
-
-    function smoothScrooling(e) {
-        if (e.target.matches('a[href^="#"]')) {
-            e.preventDefault();
-            const idSelector = e.target.hash
-            const anchorTarget = document.querySelector(idSelector);
-            anchorTarget.scrollIntoView({ behavior: 'smooth' });
-        }
+class App {
+    constructor() {
+        document.addEventListener('DOMContentLoaded', () => this.init());
     }
 
-    /* // Navbar scrolled
-    window.addEventListener('scroll', throttle(() => {
-        const currentScroll = window.scrollY;
-        if (currentScroll > 200) {
-            nav.classList.add('navbar-scrolled');
-        } else {
-            nav.classList.remove('navbar-scrolled');
-        }
-    }, 25)); */
+    // Initializes all methods
+    init() {
+        this.setupNavbar();
+        this.setupSmoothScrolling();
+        this.setupScrollEffects();
+        this.setupLightbox();
+        this.setupCounterAnimation();
+        this.setupParallaxEffect();
+        this.setupScrollAnimations();
+    }
 
-    // Animate css using observer
-    const animationObserver = new IntersectionObserver(entries => {
-        entries
-            .filter(entry => entry.isIntersecting)
-            .forEach(entry => {
-                const element = entry.target;
-                element.classList.add('animate__animated');
-                element.classList.add('animate__' + element.getAttribute('data-scroll-animation'));
+    //  Utility Functions
+    static throttle(fn, time) {
+        let timeoutId;
+        return (...args) => {
+            if (!timeoutId) {
+                fn(...args);
+                timeoutId = setTimeout(() => timeoutId = null, time);
+            }
+        };
+    }
+
+    // Navbar Shrinking Effect
+    setupNavbar() {
+        const navbar = document.querySelector('#mainNav');
+        if (!navbar) return;
+
+        const shrinkNavbar = () => {
+            navbar.classList.toggle('navbar-shrink', window.scrollY > 0);
+        };
+
+        shrinkNavbar();
+        document.addEventListener('scroll', shrinkNavbar);
+
+        // Close the responsive navbar on item click
+        const navbarToggler = document.querySelector('.navbar-toggler');
+        document.querySelectorAll('#navbarResponsive .nav-link').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.getComputedStyle(navbarToggler).display !== 'none') {
+                    navbarToggler.click();
+                }
             });
-    });
+        });
+    }
 
-    document.querySelectorAll("[data-scroll]").forEach(element => {
-        animationObserver.observe(element);
-    });
+    // Smooth Scrolling 
+    setupSmoothScrolling() {
+        document.querySelector("nav").addEventListener("click", (e) => {
+            if (e.target.matches('a[href^="#"]')) {
+                e.preventDefault();
+                document.querySelector(e.target.hash)?.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
 
-    // progress bar
-    window.addEventListener('scroll', () => {
-        const winScroll = window.scrollY;
-        const height = document.documentElement.scrollHeight - window.innerHeight;
-        const scrolled = (winScroll / height) * 100;
-        document.querySelector(".loading").style.width = scrolled + "%";
-    });
+    // Scroll Effects (Navbar & Progress Bar)
+    setupScrollEffects() {
+        const navbar = document.querySelector("nav");
+        const progressBar = document.querySelector(".loading");
 
-    // Numbers pending
-    document.querySelectorAll('.counter').forEach(counter => {
-        let started = false;
+        window.addEventListener('scroll', App.throttle(() => {
+            navbar.classList.toggle('navbar-scrolled', window.scrollY > 200);
 
-        function startCounter() {
-            if (started) return; // Prevent multiple triggers
-            started = true;
+            // Progress bar update
+            const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            if (progressBar) progressBar.style.width = `${scrollPercent}%`;
+        }, 10));
+    }
 
-            const target = Number(counter.getAttribute('data-target'));
-            const duration = Number(counter.getAttribute('data-duration'));
-            const interval = 10;
-            const increment = target / (duration / interval);
+    // Portfolio Lightbox
+    setupLightbox() {
+        new SimpleLightbox({ elements: '#portfolio a.portfolio-box' });
+    }
+
+    // Counter Animation
+    setupCounterAnimation() {
+        document.querySelectorAll('.counter').forEach(counter => {
+            let started = false;
+            const target = Number(counter.dataset.target);
+            const duration = Number(counter.dataset.duration);
+            const increment = target / (duration / 10);
             let current = 0;
 
             const updateCounter = () => {
@@ -142,27 +96,47 @@ window.addEventListener('DOMContentLoaded', event => {
                 }
             };
 
-            const timer = setInterval(updateCounter, interval);
-        }
+            const startCounter = () => {
+                if (started) return;
+                started = true;
+                const timer = setInterval(updateCounter, 10);
+            };
 
-        const counterObserver = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting) startCounter();
+            new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting) startCounter();
+            }).observe(counter);
         });
-        counterObserver.observe(counter)
+    }
 
-    });
-
-    // Parallex effect
-    document.querySelectorAll('.portfolio-box').forEach(box => {
-        const img = box.querySelector('img');
-
-        box.addEventListener('mousemove', (e) => {
-            const { left, top, width, height } = box.getBoundingClientRect();
-            const x = ((e.clientX - left) / width) * 100;
-            const y = ((e.clientY - top) / height) * 100;
-
-            img.style.transformOrigin = `${x}% ${y}%`;
+    // Parallax Effect on Portfolio Images
+    setupParallaxEffect() {
+        document.querySelectorAll('.portfolio-box img').forEach(img => {
+            img.parentElement.addEventListener('mousemove', (e) => {
+                const { left, top, width, height } = img.parentElement.getBoundingClientRect();
+                const x = ((e.clientX - left) / width) * 100;
+                const y = ((e.clientY - top) / height) * 100;
+                img.style.transformOrigin = `${x}% ${y}%`;
+            });
         });
-    });
+    }
 
-});
+    // Animate.css Observer (Scroll-triggered animations)
+    setupScrollAnimations() {
+        const animationObserver = new IntersectionObserver(entries => {
+            entries
+                .filter(entry => entry.isIntersecting)
+                .forEach(entry => {
+                    const element = entry.target;
+                    element.classList.add('animate__animated');
+                    element.classList.add('animate__' + element.getAttribute('data-scroll-animation'));
+                });
+        });
+
+        document.querySelectorAll("[data-scroll]").forEach(element => {
+            animationObserver.observe(element);
+        });
+    }
+}
+
+// Initialize the app
+new App();
