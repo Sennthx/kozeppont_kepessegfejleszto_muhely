@@ -10,7 +10,6 @@ class App {
         this.setupScrollEffects();
         this.setupLightbox();
         this.setupCounterAnimation();
-        this.setupParallaxEffect();
         this.setupScrollAnimations();
     }
 
