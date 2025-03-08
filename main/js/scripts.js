@@ -108,18 +108,6 @@ class App {
         });
     }
 
-    // Parallax Effect on Portfolio Images
-    setupParallaxEffect() {
-        document.querySelectorAll('.portfolio-box img').forEach(img => {
-            img.parentElement.addEventListener('mousemove', (e) => {
-                const { left, top, width, height } = img.parentElement.getBoundingClientRect();
-                const x = ((e.clientX - left) / width) * 100;
-                const y = ((e.clientY - top) / height) * 100;
-                img.style.transformOrigin = `${x}% ${y}%`;
-            });
-        });
-    }
-
     // Animate.css Observer (Scroll-triggered animations)
     setupScrollAnimations() {
         const animationObserver = new IntersectionObserver(entries => {
